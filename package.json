@@ -10,7 +10,9 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@highlightjs/vue-plugin": "^2.1.0",
     "@tauri-apps/api": "^1.4.0",
+    "highlight.js": "^11.8.0",
     "vue": "^3.3.4"
   },
   "devDependencies": {

@@ -79,10 +79,17 @@ async function saveMemos() {
   await message('Memos saved', 'Programming memos');
 }
 
+function editCode(event: Event) {
+  if (event instanceof InputEvent) {
+    // newMemo.value.code
+    if (event.target instanceof HTMLElement) {
+      newMemo.value.code = event.target.innerText
+    }
+  }
+}
+
 loadMemos().then((loadedMemos: Memo[]) => {
-  const maxId = loadedMemos.reduce((max, memo) => {
-    return memo.id > max ? memo.id : max;
-  }, 0);
+  const maxId = loadedMemos.reduce((max, memo) => memo.id > max ? memo.id : max, 0);
 
   memos.value = loadedMemos;
   newMemo.value.id = maxId + 1;
@@ -92,7 +99,7 @@ loadMemos().then((loadedMemos: Memo[]) => {
 </script>
 
 <template>
-  <div class="flex flex-col w-screen p-2 gap-y-4 bg-blue-700">
+  <div class="flex flex-col w-screen p-2 gap-y-4">
     <div class="flex flex-row gap-x-2 items-center">
       <div class="text-2xl">Programming memos</div>
       <button
@@ -107,7 +114,7 @@ loadMemos().then((loadedMemos: Memo[]) => {
       <MemoComponent>
         <template v-slot:title>
           <div class="flex flex-row justify-between w-full items-center">
-          <input v-model="newMemo.title">
+          <div>{{ newMemo.title }}</div>
           <button
             @click="addMemo"
             class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-3 py-1"
@@ -116,10 +123,12 @@ loadMemos().then((loadedMemos: Memo[]) => {
           </button>
         </div>
         </template>
-        <textarea
-          v-model="newMemo.code"
-          class="p-1 w-full rounded-sm px-1">
-        </textarea>
+        <div
+          contenteditable="true"
+          @input="editCode"
+          class="p-1 w-full rounded-sm px-1 text-sm h-fit">
+          {{ newMemo.code }}
+        </div>
       </MemoComponent>
 
       <hr v-if="memos.length > 0" class="border-black my-1"/>
@@ -132,40 +141,39 @@ loadMemos().then((loadedMemos: Memo[]) => {
           <div class="flex flex-row gap-x-2 items-center">
             <button
               @click="copyCode(memo.id)"
-              class="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg px-3 py-1"
+              class="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 text-sm rounded-lg px-3 py-1"
             >
               Copy
             </button>
-            <input v-model="memo.title" class="rounded-sm px-1">
+            <div>{{ memo.title }}</div>
           </div>
           <div class="flex flex-row gap-x-2 items-center">
             <button
               v-if="!memo.editable"
               @click="toggleEditable(memo.id)"
-              class="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg px-3 py-1"
+              class="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 text-sm rounded-lg px-3 py-1"
             >
               Edit
             </button>
             <button
               v-else
               @click="toggleEditable(memo.id)"
-              class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-3 py-1"
+              class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 text-sm rounded-lg px-3 py-1"
             >
               Done
             </button>
             <button
               @click="removeMemo(memo.id)"
-              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg px-3 py-1"
+              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 text-sm rounded-lg px-3 py-1"
             >
               Delete
             </button>
           </div>
         </template>
-        <textarea
-          v-model="memo.code"
-          :disabled="!memo.editable"
-          class="p-1 w-full rounded-sm px-1">
-        </textarea>
+        <highlightjs
+          :code="memo.code"
+          autodetect
+          class="p-1 w-full rounded-sm px-1 text-sm"/>
       </MemoComponent>
     </div>
   </div>
