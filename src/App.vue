@@ -4,6 +4,8 @@
 import { ref } from "vue";
 
 import { writeText } from '@tauri-apps/api/clipboard';
+import { message } from '@tauri-apps/api/dialog';
+import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
 
 import MemoComponent from './components/Memo.vue';
 
@@ -13,6 +15,8 @@ interface Memo {
   editable: boolean;
   code: string;
 }
+
+const memos_file = 'memos.json';
 
 const memos = ref<Memo[]>([]);
 const newMemo = ref<Memo>({
@@ -49,12 +53,48 @@ async function copyCode(id: number) {
   }
 }
 
+async function loadMemos(): Promise<Memo[]> {
+  try {
+    const contents = await readTextFile(memos_file, { dir: BaseDirectory.AppData });
+    return JSON.parse(contents);
+  } catch (error) {
+    console.log('Cannot load memos:', error);
+    return [];
+  }
+}
+
+async function saveMemos() {
+  if (memos.value.length < 1) return;
+
+  // TODO: Check if AppData directory exists
+  // const data_exists = await exists('avatar.png', { dir: BaseDirectory.AppData });
+
+  try {
+    await writeTextFile(memos_file, JSON.stringify(memos.value), { dir: BaseDirectory.AppData });
+  } catch (error) {
+    await message('Unable to save memos', { title: 'Programming memos', type: 'error' });
+    return
+  }
+
+  await message('Memos saved', 'Programming memos');
+}
+
+loadMemos().then(loadedMemos => memos.value = loadedMemos)
+
 </script>
 
 <template>
-  <div class="flex flex-col h-screen w-screen p-2">
-    <div>Programming memos</div>
-    <div class="flex flex-col bg-orange-500 py-2 w-full gap-y-2">
+  <div class="flex flex-col h-screen w-screen p-2 gap-y-4">
+    <div class="flex flex-row gap-x-2 items-center">
+      <div>Programming memos</div>
+      <button
+            @click="saveMemos"
+            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-3 py-1"
+          >
+            Save
+          </button>
+    </div>
+    <div class="flex flex-col bg-orange-500 w-full gap-y-2">
       <MemoComponent
         v-for="(memo, _) in memos"
         :key="memo.id"
