@@ -24,9 +24,6 @@
         "exists": true,
         "scope": ["$APPDATA/*"]
       },
-      "path": {
-        "all": true
-      },
       "dialog": {
         "all": false,
         "message": true
