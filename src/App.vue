@@ -7,6 +7,8 @@ import { writeText } from '@tauri-apps/api/clipboard';
 import { message } from '@tauri-apps/api/dialog';
 import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
 
+import contenteditable from 'vue-contenteditable';
+
 import MemoComponent from './components/Memo.vue';
 
 interface Memo {
@@ -27,10 +29,15 @@ const newMemo = ref<Memo>({
 });
 
 function addMemo(_: any) {
-  if (newMemo.value.code === '') return
+  const newCode = newMemo.value.code;
+  if (newCode === '' || newCode === '\n') return
 
-  memos.value.push({ ...newMemo.value});
+  memos.value.push({
+    ...newMemo.value,
+    code: newCode.trim(),
+  });
   newMemo.value.id += 1;
+  newMemo.value.title = 'New memo ...';
   newMemo.value.code = '';
 }
 
@@ -64,8 +71,6 @@ async function loadMemos(): Promise<Memo[]> {
 }
 
 async function saveMemos() {
-  if (memos.value.length < 1) return;
-
   // TODO: Check if AppData directory exists
   // const data_exists = await exists('avatar.png', { dir: BaseDirectory.AppData });
 
@@ -77,15 +82,6 @@ async function saveMemos() {
   }
 
   await message('Memos saved', 'Programming memos');
-}
-
-function editCode(event: Event) {
-  if (event instanceof InputEvent) {
-    // newMemo.value.code
-    if (event.target instanceof HTMLElement) {
-      newMemo.value.code = event.target.innerText
-    }
-  }
 }
 
 loadMemos().then((loadedMemos: Memo[]) => {
@@ -104,7 +100,7 @@ loadMemos().then((loadedMemos: Memo[]) => {
       <div class="text-2xl">Programming memos</div>
       <button
             @click="saveMemos"
-            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-3 py-1"
+            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 text-sm rounded-lg px-3 py-1"
           >
             Save
           </button>
@@ -113,22 +109,27 @@ loadMemos().then((loadedMemos: Memo[]) => {
       <!-- New Memo html -->
       <MemoComponent>
         <template v-slot:title>
-          <div class="flex flex-row justify-between w-full items-center">
-          <div>{{ newMemo.title }}</div>
-          <button
-            @click="addMemo"
-            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-3 py-1"
-          >
-            +
-          </button>
-        </div>
+          <div class="flex flex-row justify-between w-full items-center gap-2">
+            <contenteditable
+              tag="div"
+              v-model="newMemo.title"
+              :no-html="true"
+              class="w-full px-1 codearea"
+            />
+            <button
+              @click="addMemo"
+              class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 text-sm rounded-lg px-3 py-1"
+            >
+              +
+            </button>
+          </div>
         </template>
-        <div
-          contenteditable="true"
-          @input="editCode"
-          class="p-1 w-full rounded-sm px-1 text-sm h-fit">
-          {{ newMemo.code }}
-        </div>
+        <contenteditable
+          tag="div"
+          v-model="newMemo.code"
+          :no-html="true"
+          class="p-1 w-full rounded-sm px-1 text-sm codearea"
+        />
       </MemoComponent>
 
       <hr v-if="memos.length > 0" class="border-black my-1"/>
