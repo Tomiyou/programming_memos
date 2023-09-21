@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "programming_notes",
-    "version": "0.0.0"
+    "version": "1.0.0"
   },
   "tauri": {
     "allowlist": {
@@ -36,7 +36,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.tomiyou.programming.notes",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -52,7 +52,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "programming_notes",
+        "title": "Programming notes",
         "width": 800,
         "height": 600
       }

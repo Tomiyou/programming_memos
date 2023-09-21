@@ -55,7 +55,6 @@ function toggleEditable(id: number) {
 async function copyCode(id: number) {
   const memo = memos.value.find(memo => memo.id === id);
   if (memo) {
-    console.log(memo.id, memo.title, memo.code);
     await writeText(memo.code);
   }
 }
@@ -85,7 +84,7 @@ async function saveMemos() {
 }
 
 loadMemos().then((loadedMemos: Memo[]) => {
-  const maxId = loadedMemos.reduce((max, memo) => memo.id > max ? memo.id : max, 0);
+  const maxId = loadedMemos.reduce((max, memo) => memo.id > max ? memo.id : max, -1);
 
   memos.value = loadedMemos;
   newMemo.value.id = maxId + 1;
@@ -114,7 +113,7 @@ loadMemos().then((loadedMemos: Memo[]) => {
               tag="div"
               v-model="newMemo.title"
               :no-html="true"
-              class="w-full px-1 codearea"
+              class="w-full px-3 codearea"
             />
             <button
               @click="addMemo"
@@ -124,12 +123,14 @@ loadMemos().then((loadedMemos: Memo[]) => {
             </button>
           </div>
         </template>
-        <contenteditable
-          tag="div"
-          v-model="newMemo.code"
-          :no-html="true"
-          class="p-1 w-full rounded-sm px-1 text-sm codearea"
-        />
+        <div class="px-1 mb-1">
+          <contenteditable
+            tag="div"
+            v-model="newMemo.code"
+            :no-html="true"
+            class="p-1 w-full rounded-sm px-3 text-sm codearea"
+          />
+        </div>
       </MemoComponent>
 
       <hr v-if="memos.length > 0" class="border-black my-1"/>
@@ -171,12 +172,33 @@ loadMemos().then((loadedMemos: Memo[]) => {
             </button>
           </div>
         </template>
-        <highlightjs
-          :code="memo.code"
-          autodetect
-          class="p-1 w-full rounded-sm px-1 text-sm"/>
+        <div class="">
+            <highlightjs
+            :code="memo.code"
+            autodetect
+            class="p-1 w-full rounded-sm px-1 text-sm"/>
+        </div>
       </MemoComponent>
     </div>
+    <highlightjs code="import { createApp } from 'vue';
+import './styles.css';
+import App from './App.vue';
+
+import 'highlight.js/styles/stackoverflow-dark.css'
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+// @ts-ignore
+// import hljs from 'highlight.js/lib/common';
+import hljsVuePlugin from '@highlightjs/vue-plugin';
+
+hljs.registerLanguage('javascript', javascript);
+
+const app = createApp(App);
+app.use(hljsVuePlugin);
+app.mount('#app');
+" autodetect/>
+    <!-- <highlightjs code="function main() { return 0; }" language='javascript'/> -->
+    <div>kekw</div>
   </div>
 </template>
 
